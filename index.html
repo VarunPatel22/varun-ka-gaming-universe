@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Varun ka Gaming Universe 🎭</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-anim">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="particles"></div>
+  </div>
+
+  <main id="app" class="container">
+
+    <!-- HEADER / BRAND -->
+    <header class="brand">
+      <div class="logo">🎭 Varun ka Gaming Universe</div>
+      <div class="meta">Fast • Funny • Social</div>
+    </header>
+
+    <!-- HOME -->
+    <section id="home" class="screen card active">
+      <h1 class="title gradient-text">Let the truths fly ✨</h1>
+
+      <div class="form-row">
+        <input id="username" placeholder="Your name (optional)" />
+      </div>
+
+      <div class="form-row join-row">
+        <input id="roomInput" placeholder="Room Code (to join)" />
+        <button class="btn ghost" onclick="joinRoom()">Join</button>
+      </div>
+
+      <div class="form-row">
+        <button class="btn primary" onclick="createRoom()">Create Room</button>
+        <p class="hint">Host creates the room — others join with the code.</p>
+      </div>
+    </section>
+
+    <!-- LOBBY -->
+    <section id="lobby" class="screen card">
+      <div class="row space">
+        <div>
+          <h2>Lobby</h2>
+          <p class="muted">Room Code: <strong id="roomCodeText">—</strong></p>
+        </div>
+        <div class="host-controls" id="hostControls">
+          <label class="muted">Rounds</label>
+          <select id="roundSelect">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+          <button class="btn primary" onclick="startGame()">Start Game</button>
+        </div>
+      </div>
+
+      <h3 class="muted">Players</h3>
+      <ul id="playerList" class="players"></ul>
+    </section>
+
+    <!-- GAME -->
+    <section id="game" class="screen card">
+      <div class="row space">
+        <h2 id="questionText">Waiting for the next question…</h2>
+        <div class="score-glass" id="roundInfo">Scores — —</div>
+      </div>
+
+      <div class="center-col">
+        <textarea id="answerBox" placeholder="Write something funny…"></textarea>
+
+        <div class="controls">
+          <div class="timer-wrap" aria-hidden="true">
+            <svg class="timer-ring" viewBox="0 0 100 100">
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#ff7aa2"/>
+                  <stop offset="100%" stop-color="#ffd36b"/>
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="45" class="ring-bg"/>
+              <circle cx="50" cy="50" r="45" class="ring-fg" id="timerRing"/>
+              <text x="50" y="56" text-anchor="middle" class="timer-text" id="timer">⏳ 60s</text>
+            </svg>
+          </div>
+
+          <button class="btn accent large" onclick="submitAnswer()" id="submitButton">Submit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOTE -->
+    <section id="vote" class="screen card">
+      <h2 class="title-sm">Vote the funniest 😄</h2>
+
+      <div id="options" class="options-grid"></div>
+
+      <div class="vote-bottom row space">
+        <div id="scoreBoard" class="scoreboard">Scores — —</div>
+        <div class="muted">Votes are live — results update instantly</div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results" class="screen card">
+      <h2>🏆 Final Results</h2>
+      <ul id="leaderboard" class="leaderboard"></ul>
+      <div class="row">
+        <button class="btn ghost" onclick="location.reload()">Play Again</button>
+      </div>
+    </section>
+
+    <footer class="footer muted">Dekhta kya hai</footer>
+  </main>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Truth Comes Out — Player</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-anim small">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+
+  <main class="card small-card container">
+    <h2 id="question">Waiting for host…</h2>
+
+    <div class="row center">
+      <div id="timer" class="muted">⏳ 60s</div>
+    </div>
+
+    <input id="answer" placeholder="Type your answer" />
+    <div class="row center">
+      <button id="submit" class="btn primary" onclick="submitAnswer()">Submit</button>
+      <button id="start" class="btn ghost host-only" onclick="startGame()">Start Round</button>
+    </div>
+
+    <div id="options" class="options-grid compact"></div>
+    <pre id="scores" class="muted small-scores"></pre>
+  </main>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
