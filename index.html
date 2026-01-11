@@ -23,26 +23,51 @@
     <!-- HEADER / BRAND -->
     <header class="brand">
       <div class="logo">🎭 Varun ka Gaming Universe</div>
-      <div class="meta">Fast • Funny • Social</div>
     </header>
 
-    <!-- HOME -->
+    <!-- HOME / CREATE ROOM -->
     <section id="home" class="screen card active">
       <h1 class="title gradient-text">Let the truths fly ✨</h1>
 
       <div class="form-row">
-        <input id="username" placeholder="Your name (optional)" />
+        <input id="username" placeholder="Your name" />
       </div>
 
-      <div class="form-row join-row">
+      <div class="form-row" style="margin-top:12px;">
         <input id="roomInput" placeholder="Room Code (to join)" />
-        <button class="btn ghost" onclick="joinRoom()">Join</button>
       </div>
 
-      <div class="form-row">
-        <button class="btn primary" onclick="createRoom()">Create Room</button>
-        <p class="hint">Host creates the room — others join with the code.</p>
+      <!-- Avatar picker: constrained inside the card — arrows + scroll container -->
+      <div class="form-row" style="margin-top:10px;">
+        <label class="muted" style="margin-right:12px; flex:0 0 auto;">Choose your avatar</label>
+
+        <div class="avatar-strip" aria-hidden="false" role="group" aria-label="Avatar picker">
+          <button class="nav-btn" id="avatarPrev" aria-label="Scroll avatars left">◀</button>
+
+          <div class="avatar-container" aria-hidden="false">
+            <div id="avatarStrip" class="avatar-track" role="list" aria-label="avatars">
+              <!-- avatars injected by JS -->
+            </div>
+          </div>
+
+          <button class="nav-btn" id="avatarNext" aria-label="Scroll avatars right">▶</button>
+        </div>
       </div>
+
+      <div class="form-row action-row" style="margin-top:12px;">
+  <button class="btn ghost spider-btn" onclick="joinRoom()" id="joinBtn"><span>Join</span></button>
+  <button class="btn primary create-btn spider-btn" onclick="createRoom()" id="createBtn"><span>Create Room</span></button>
+  <!-- Admin button (opens admin panel) -->
+</div>
+
+<script>
+document.getElementById('openAdminBtn').addEventListener('click', () => {
+  // open admin panel in a new tab — admin.html is served from backend/public/admin.html
+  window.open('/admin.html', '_blank');
+});
+</script>
+
+      <p class="hint" style="margin-top:12px;">Host creates the room — others join with the code.</p>
     </section>
 
     <!-- LOBBY -->
@@ -51,17 +76,24 @@
         <div>
           <h2>Lobby</h2>
           <p class="muted">Room Code: <strong id="roomCodeText">—</strong></p>
+
+          <div class="rounds-row host-only" style="margin-top:12px; align-items:center;">
+            <label class="muted" style="margin-right:10px;">Rounds</label>
+            <select id="roundSelect" style="margin-right:10px;">
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="7">7</option>
+              <option value="10" selected>10</option>
+              <option value="12">12</option>
+              <option value="15">15</option>
+            </select>
+
+            <!-- Start Game button: host-only -->
+            <button class="btn primary start-btn host-only" onclick="startGame()" id="startBtn">Start Game</button>
+          </div>
         </div>
-        <div class="host-controls" id="hostControls">
-          <label class="muted">Rounds</label>
-          <select id="roundSelect">
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-          </select>
-          <button class="btn primary" onclick="startGame()">Start Game</button>
-        </div>
+
+        <div class="host-controls" id="hostControls" style="display:none;"></div>
       </div>
 
       <h3 class="muted">Players</h3>
@@ -70,9 +102,8 @@
 
     <!-- GAME -->
     <section id="game" class="screen card">
-      <div class="row space">
-        <h2 id="questionText">Waiting for the next question…</h2>
-        <div class="score-glass" id="roundInfo">Scores — —</div>
+      <div class="row space question-row" style="align-items:flex-start;">
+        <h2 id="questionText" class="question">Waiting for the next question…</h2>
       </div>
 
       <div class="center-col">
@@ -80,11 +111,11 @@
 
         <div class="controls">
           <div class="timer-wrap" aria-hidden="true">
-            <svg class="timer-ring" viewBox="0 0 100 100">
+            <svg class="timer-ring" viewBox="0 0 100 100" role="img" aria-label="timer">
               <defs>
                 <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#ff7aa2"/>
-                  <stop offset="100%" stop-color="#ffd36b"/>
+                  <stop offset="0%" stop-color="#007a8a"/>
+                  <stop offset="100%" stop-color="#00a6b5"/>
                 </linearGradient>
               </defs>
               <circle cx="50" cy="50" r="45" class="ring-bg"/>
@@ -95,24 +126,29 @@
 
           <button class="btn accent large" onclick="submitAnswer()" id="submitButton">Submit</button>
         </div>
+
+        <div id="topScoreboard" class="score-top">Scores — —</div>
       </div>
     </section>
 
     <!-- VOTE -->
     <section id="vote" class="screen card">
       <h2 class="title-sm">Vote the funniest 😄</h2>
-
       <div id="options" class="options-grid"></div>
 
-      <div class="vote-bottom row space">
+      <div class="vote-bottom row space" style="margin-top:12px;">
         <div id="scoreBoard" class="scoreboard">Scores — —</div>
-        <div class="muted">Votes are live — results update instantly</div>
+        
       </div>
     </section>
 
     <!-- RESULTS -->
     <section id="results" class="screen card">
       <h2>🏆 Final Results</h2>
+
+      <!-- Winner area: animation will be injected next to the first player -->
+      <div id="winnerArea" class="winner-area"></div>
+
       <ul id="leaderboard" class="leaderboard"></ul>
       <div class="row">
         <button class="btn ghost" onclick="location.reload()">Play Again</button>
@@ -122,7 +158,13 @@
     <footer class="footer muted">Dekhta kya hai</footer>
   </main>
 
+  <!-- Socket.IO client from CDN -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <!-- Lottie for crown (no SRI) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+
+  <!-- App script -->
   <script src="script.js"></script>
 </body>
 </html>

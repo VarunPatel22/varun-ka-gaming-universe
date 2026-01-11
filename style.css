@@ -1,233 +1,615 @@
-/* =====================
-   UI Refresh — Bigger text & select visibility + timer fixes
-   ===================== */
+/* Full style.css
+   - Avatar picker, lobby, game, vote and results styling
+   - Rounds select improved visibility
+   - Vote options stacked with bounce animation
+   - Crown animation placement for winner
+   Replace your existing style.css with this file and hard-refresh (Ctrl+F5).
+*/
 
+/* =========================
+   Theme variables
+   ========================= */
 :root{
-  --bg1: #0f0f1a;
-  --glass: rgba(255,255,255,0.04);
-  --accent: linear-gradient(90deg,#ff7aa2,#ff5a8f);
-  --primary: #ff5a8f;
-  --accent-2: #6a9cff;
-  --muted: rgba(255,255,255,0.85);
-  --glass-2: rgba(255,255,255,0.03);
-  --card-radius: 16px;
-  --card-padding: 26px;
-  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --bg-dark: #061426;
+  --bg-mid:  #073249;
+  --primary:  #035CC2;
+  --primary-2:#0286DF;
+  --accent:   #00B0FC;
+  --card-radius: 12px;
+  --card-padding: 20px;
+  --text: #E6FBF8;
+  --muted: rgba(230,251,248,0.72);
+  --glass: rgba(255,255,255,0.03);
+  --font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   --base-font-size: 16px;
+  --spider-blue: #3498db;
+  --spider-blue-dark: #256aa8;
 }
 
-/* Make global font bigger for readability */
-html { font-size: 16px; }
-body { font-size: var(--base-font-size); }
+/* =========================
+   Base reset & layout
+   ========================= */
+*,
+*::before,
+*::after { box-sizing: border-box; }
 
-/* Background animated blobs & particles */
-.bg-anim {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  overflow: hidden;
-  filter: saturate(110%);
-}
-.bg-anim.small { filter: blur(0.5px) saturate(120%); }
-
-.blob {
-  position: absolute;
-  width: 45vmax;
-  height: 45vmax;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  opacity: 0.22;
-  transform: translate3d(-20%, -20%, 0);
-  animation: float 14s ease-in-out infinite;
-  filter: blur(36px);
-}
-.b1 { background: radial-gradient(circle at 30% 30%, #ffb6d9, #ff5a8f); left: -10%; top: -18%; }
-.b2 { background: radial-gradient(circle at 70% 30%, #92b7ff, #6a9cff); right: -20%; top: -10%; animation-duration: 18s; opacity:0.2; }
-.b3 { background: radial-gradient(circle at 50% 70%, #7bf8c0, #5be3a0); left: 10%; bottom: -30%; animation-duration: 22s; opacity:0.14; }
-
-@keyframes float {
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(6%, -4%,0) scale(1.03); }
-  100% { transform: translate3d(0,0,0) scale(1); }
-}
-
-/* gentle sparkles */
-.particles {
-  position: absolute; inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 18px 18px;
-  opacity: 0.06;
-}
-
-/* Global page layout */
-body {
+html, body {
+  height: 100%;
   margin: 0;
-  min-height: 100vh;
-  background: linear-gradient(180deg, rgba(12,12,18,1) 0%, rgba(0,0,0,1) 100%);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg, var(--bg-dark), var(--bg-mid));
+  color: var(--text);
+  font-size: var(--base-font-size);
+  overflow-x: hidden; /* prevent page horizontal scroll from overflow bugs */
 }
 
-/* Container */
+/* Center the app and constrain width */
 .container {
   width: 100%;
   max-width: 980px;
-  margin: 40px;
+  margin: 32px auto;
+  padding: 0 12px;
 }
 
-/* brand */
-.brand { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; color: #fff; }
-.logo { font-weight:800; font-size:20px; letter-spacing: -0.02em; }
-.meta { color: rgba(255,255,255,0.6); font-size:13px }
-
-/* card style (glassmorphism) */
+/* =========================
+   Card & screens
+   ========================= */
 .card {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 16px auto;
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   border: 1px solid rgba(255,255,255,0.04);
-  border-radius: var(--card-radius);
-  padding: var(--card-padding);
-  box-shadow: 0 6px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-  color: #fff;
-  transition: transform 220ms cubic-bezier(.2,.9,.3,1), box-shadow 220ms;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+  overflow: hidden;
 }
-.card:hover { transform: translateY(-4px); box-shadow: 0 12px 60px rgba(2,6,23,0.7); }
 
-/* mobile card */
-.small-card { max-width:520px; margin:40px auto; }
+/* small-card used in game.html */
+.small-card { max-width: 520px; padding: 16px; }
 
-/* screens */
-.screen { display:none; }
-.screen.active { display:block; }
+/* Only active screen visible */
+.screen { display: none; opacity: 0; transition: opacity 160ms ease; }
+.screen.active { display: block; opacity: 1; }
 
-/* layout helpers */
-.row { display:flex; align-items:center; gap:12px; }
-.space { justify-content:space-between; }
-.center { justify-content:center; }
-.center-col { display:flex; flex-direction:column; align-items:center; gap:12px; }
+/* =========================
+   Header & typography
+   ========================= */
+.brand { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.logo { font-weight:800; font-size:20px; color:var(--text); }
+.meta { color:var(--muted); font-size:13px; }
 
-/* typography larger sizes */
-.title { font-size:28px; margin:6px 0; font-weight:700; letter-spacing:-0.02em; }
-.title-sm { font-size:20px; margin-bottom:6px; font-weight:700; }
-.gradient-text { background: linear-gradient(90deg,#ff9ac6,#6a9cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.title { font-size:26px; margin:0 0 10px; font-weight:800; }
+.hint { color:var(--muted); margin-top:10px; }
 
-/* form elements — larger for readability */
+/* =========================
+   Inputs & buttons
+   ========================= */
 input, textarea, select {
   width: 100%;
-  max-width: 680px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  background: rgba(255,255,255,0.02);
-  color: #fff;
-  font-size: 16px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-}
-input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.48); }
-
-textarea { height:120px; resize:none; font-size:16px; }
-
-/* select visibility fix: ensure dark background + visible text */
-select {
-  background: rgba(0,0,0,0.45);
-  color: #fff;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
-  font-weight:700;
   border: 1px solid rgba(255,255,255,0.04);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+  background: rgba(0,0,0,0.22);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
 }
+textarea { min-height: 110px; resize: none; }
 
-/* players list (bigger) */
-.players { display:flex; gap:8px; flex-wrap:wrap; list-style:none; padding:0; margin: 12px 0; }
-.players li {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  padding:10px 14px; border-radius:999px; font-weight:700;
-  font-size:15px; color:#fff; min-width:90px; text-align:center;
-  border:1px solid rgba(255,255,255,0.03);
-}
-
-/* larger buttons */
 .btn {
   display:inline-flex; align-items:center; justify-content:center;
-  gap:8px; padding:12px 18px; border-radius:12px;
-  border:none; cursor:pointer; font-weight:800; color:#fff;
-  transition: transform 140ms ease, box-shadow 160ms ease, opacity 160ms;
-  font-size:15px;
+  padding:10px 14px; border-radius:10px; border:none; cursor:pointer;
+  font-weight:800;
 }
-.btn:hover { transform: translateY(-3px); }
-.btn:active { transform: translateY(0); }
+.btn.primary { background: linear-gradient(90deg, var(--primary), var(--primary-2)); color:#fff; }
+.btn.ghost { background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text); }
+.btn.accent { background: linear-gradient(90deg, var(--accent), #76D5FE); color:#04243B; }
 
-.btn.primary { background: linear-gradient(90deg,#ff7aa2,#ff5a8f); box-shadow: 0 6px 18px rgba(255,90,143,0.18); }
-.btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.06); color:#fff; padding:10px 14px; }
-.btn.accent { background: linear-gradient(90deg,#ffd36b,#ff7aa2); color: #111; }
-.btn.large { padding:14px 22px; font-size:16px; border-radius:14px; }
-
-/* submit row and timer ring */
-.controls { display:flex; align-items:center; gap:18px; margin-top:8px; }
-.timer-wrap { width:92px; height:92px; position:relative; }
-.timer-ring { width:92px; height:92px; }
-.ring-bg { fill:none; stroke: rgba(255,255,255,0.06); stroke-width:8; }
-.ring-fg { fill:none; stroke: url(#grad); stroke-width:8; stroke-linecap:round; transform: rotate(-90deg); transform-origin:center; transition: stroke-dashoffset 400ms linear; stroke-dasharray: 283; stroke-dashoffset: 0; }
-.timer-text { font-size:11px; fill: #fff; font-weight:800; }
-
-/* options grid larger */
-.options-grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap:14px; margin-top:14px;
+/* =========================
+   Improve visibility for the Rounds select in the lobby
+   ========================= */
+#roundSelect,
+.rounds-row select {
+  width: auto;
+  min-width: 96px;
+  padding: 10px 12px;
+  padding-right: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(90deg, rgba(3,92,194,0.10), rgba(2,134,223,0.06)),
+    rgba(0,0,0,0.20);
+  color: var(--text);
+  font-weight: 700;
+  -webkit-appearance: none;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(2,20,40,0.22);
 }
-.options-grid.compact { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 
-.options-grid button {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-radius:12px; padding:16px; font-weight:800; font-size:16px;
+#roundSelect,
+.rounds-row select {
+  background-image:
+    linear-gradient(90deg, rgba(3,92,194,0.10), rgba(2,134,223,0.06)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='12' height='12'><path d='M5 7l5 5 5-5' stroke='%23E6FBF8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+}
+
+#roundSelect option,
+.rounds-row select option {
+  color: #04243B;
+  background: #E6FBF8;
+}
+
+#roundSelect:focus,
+.rounds-row select:focus {
+  outline: 3px solid rgba(3,156,195,0.16);
+  outline-offset: 2px;
+}
+
+/* =========================
+   Form-row and avatar-strip
+   ========================= */
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+.form-row > label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.avatar-strip {
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0; /* allow shrink */
+}
+
+.nav-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+}
+
+.avatar-container {
+  flex: 1 1 0;
+  min-width: 0;          /* critical for flexbox; allows inner track to scroll instead of forcing overflow */
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar-track,
+.avatar-list,
+#avatarStrip {
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 8px;
+  margin: 0;
+  min-height: 64px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.avatar-track::-webkit-scrollbar { height: 8px; }
+.avatar-track::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 999px; }
+.avatar-track { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
+
+/* =========================
+   Avatar images (fixed size & stable)
+   ========================= */
+.avatar-track .avatar-btn {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.avatar-track img.avatar,
+.avatar-list img.avatar,
+#avatarStrip img.avatar,
+.avatar {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  flex: 0 0 56px;      /* do not shrink or grow */
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.avatar-track img.avatar.selected,
+.avatar.selected {
+  transform: scale(1.03);
+  border: 2px solid rgba(0,209,193,0.12);
+}
+
+.avatar-track img,
+.avatar-list img,
+#avatarStrip img { max-width: none; }
+
+/* =========================
+   Lobby players list (fixed avatars)
+   ========================= */
+.players {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.players li {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.02);
+  font-weight:800;
+}
+.players li img,
+.player-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  flex: 0 0 48px;     /* do not shrink */
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+/* =========================
+   Host-only controls & rounds spacing
+   ========================= */
+.host-only { display: none; }  /* show/hide via JS */
+.rounds-row { display:flex; gap: 18px; align-items:center; flex-wrap:wrap; }
+@media (max-width: 480px) { .rounds-row { gap: 12px; } }
+
+/* =========================
+   Scoreboard & timer (visual)
+   ========================= */
+#topScoreboard,
+.score-top {
+  position: static;
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: rgba(255,255,255,0.02);
+  padding: 8px 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.04);
-  color:#fff; cursor:pointer;
-  transition: transform 160ms cubic-bezier(.2,.9,.3,1), box-shadow 160ms;
+  font-weight: 700;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.options-grid button:hover { transform: translateY(-6px) rotate(-0.4deg); box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
-.options-grid button:active { transform: translateY(-2px); }
 
-/* scoreboard */
-.scoreboard, .score-glass {
+.score-top img,
+.scoreboard img,
+.score-avatar,
+#topScoreboard .score-avatar,
+#scoreBoard .score-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  flex: 0 0 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  display:block;
+}
+
+/* Question spacing */
+.question-row .question {
+  padding-right: 0;
+  margin: 0 0 8px 0;
+  line-height: 1.08;
+}
+
+/* Controls & timer */
+.controls { display:flex; gap:16px; align-items:center; margin-top:12px; min-height:80px; }
+.timer-wrap { width:88px; height:88px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+.timer-ring { width:88px; height:88px; }
+.timer-text { font-size:20px; fill:var(--text); font-weight:900; }
+.btn.large { min-width:120px; }
+@media (max-width:520px) {
+  .controls { flex-direction:column; align-items:stretch; }
+  .timer-wrap { width:64px; height:64px; margin:0 auto; }
+  .btn.large { width:100%; min-width:0; }
+}
+
+/* =========================
+   Options grid & vote-mode styles
+   ========================= */
+.options-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top:14px; }
+.options-grid button { border-radius:10px; padding:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); min-height:90px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.options-grid img { width:100%; height:auto; max-height:300px; object-fit:cover; border-radius:8px; }
+
+/* Vote-mode stacked list */
+.options-grid.vote-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Individual vote option */
+.vote-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 18px;
+  line-height: 1.2;
+  color: var(--text);
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  padding:10px 14px; border-radius:10px; font-weight:800; color:#fff;
-  border:1px solid rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  white-space: normal;
+  word-break: break-word;
+  box-shadow: 0 6px 18px rgba(2,20,40,0.14);
+  font-weight: 800;
+
+  /* Start hidden so bounce animation brings it in */
+  opacity: 0;
 }
 
-/* leaderboard */
-.leaderboard { list-style:none; padding:0; margin:8px 0 18px; }
-.leaderboard li { padding:12px 14px; border-radius:10px; margin-bottom:8px; background: rgba(255,255,255,0.02); display:flex; justify-content:space-between; align-items:center; font-weight:700; }
-
-/* small helpers */
-.hint { margin:6px 0; color: rgba(255,255,255,0.65); font-size:14px; }
-.muted { color: rgba(255,255,255,0.72); font-size:14px; }
-.title-sm { margin: 6px 0 12px; }
-
-/* footer */
-.footer { margin-top:14px; color:rgba(255,255,255,0.45); font-size:13px }
-
-/* responsive */
-@media (max-width:720px){
-  .container { margin:18px; }
-  .controls { flex-direction:column; gap:10px; }
-  .timer-wrap { width:72px; height:72px; }
-  .title { font-size:22px; }
+/* Hover/focus */
+.vote-option:hover:not([aria-disabled="true"]),
+.vote-option:focus:not([aria-disabled="true"]) {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(2,20,40,0.22);
+  outline: none;
 }
 
-/* subtle entry animations */
-@keyframes popIn {
-  from { transform: translateY(10px); opacity:0; }
-  to { transform: translateY(0); opacity:1; }
+/* Disabled */
+.vote-option[aria-disabled="true"] {
+  opacity: 0.85;
+  cursor: not-allowed;
+  filter: saturate(0.9);
 }
-.card { animation: popIn 420ms cubic-bezier(.2,.9,.3,1) both; }
 
-/* host-only toggle placeholder - script toggles inline style on these */
-.host-only { display:none !important; }
+.options-grid.vote-list .vote-option { min-height: 56px; }
+@media (max-width: 520px) {
+  .vote-option { font-size: 16px; padding: 12px 14px; }
+}
+
+/* =========================
+   Winner area & crown animation
+   ========================= */
+.winner-area { display:flex; justify-content:center; margin-bottom:16px; }
+
+/* Wrap for winner section */
+.winner-center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 22px; /* leave space for crown */
+}
+
+/* Crown container positioned above the avatar */
+.winner-crown {
+  position: absolute;
+  top: -8px; /* tune to sit neatly above avatar */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;   /* container width for the animation */
+  height: 96px;  /* container height for the animation */
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* inner container for Lottie (explicit size, used by the script as the lottie container) */
+.winner-crown-inner {
+  width: 88px;
+  height: 88px;
+  display: block;
+}
+
+/* Winner avatar (slightly larger to match crown scale) */
+.winner-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 5px solid rgba(255,255,255,0.04);
+  display: block;
+}
+
+/* Winner name & points styles */
+.winner-name-large { font-size: 20px; font-weight: 900; margin-top: 4px; color: var(--text); }
+.winner-pts { font-size: 16px; color: var(--muted); }
+
+/* Responsive tweaks */
+@media (max-width: 520px) {
+  .winner-crown { width: 72px; height: 72px; top: -6px; }
+  .winner-crown-inner { width: 64px; height: 64px; }
+  .winner-avatar { width: 120px; height: 120px; }
+  .winner-name-large { font-size: 18px; }
+  .winner-pts { font-size: 14px; }
+}
+
+/* =========================
+   Robust avatar utilities (to avoid accidental collapse)
+   ========================= */
+.avatar, .avatar-img, img.avatar, img.player-avatar, .player-avatar img, .score-avatar, .option-avatar {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  flex: 0 0 56px !important;
+  object-fit: cover !important;
+  border-radius: 10px !important;
+  display: block !important;
+}
+
+#topScoreboard .avatar,
+#topScoreboard img,
+.scoreboard .avatar,
+.scoreboard img {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  flex: 0 0 40px !important;
+}
+
+.players li img,
+.player-avatar {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  flex: 0 0 48px !important;
+  border-radius: 12px !important;
+}
+
+.options-grid .option-avatar,
+.option-avatar img {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  flex: 0 0 56px !important;
+}
+
+/* Ensure avatar images never collapse to zero inside flex containers */
+.avatar, .player-avatar, .score-avatar, img.avatar, img.player-avatar {
+  box-sizing: border-box;
+}
+@media (max-width:520px) {
+  .avatar, .avatar-img, img.avatar { width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; flex:0 0 44px !important; }
+  .players li img, .player-avatar { width:40px !important; height:40px !important; min-width:40px !important; min-height:40px !important; flex:0 0 40px !important; }
+  #topScoreboard img, .scoreboard img { width:32px !important; height:32px !important; }
+}
+
+/* =========================
+   Bounce animation (user-provided)
+   ========================= */
+.bounce-down {
+  animation: bounceInDown 800ms cubic-bezier(.22,.9,.35,1) forwards;
+}
+
+@keyframes bounceInDown {
+  0% {
+    transform: translateY(-100%); /* Starts off-screen above */
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(0); /* Bounces to a position */
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-15px); /* Jumps slightly up */
+  }
+  100% {
+    transform: translateY(0); /* Settles at final position */
+    opacity: 1;
+  }
+}
+
+/* =========================
+   Utilities & accessibility
+   ========================= */
+img { max-width:100%; height:auto; }
+button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid rgba(0,209,193,0.14); outline-offset: 2px; }
+
+/* Paste over your existing style.css — additions at the end handle leaderboard avatar sizing and crown z-index */
+
+/* (Start of your existing style.css — keep all current rules above unchanged) */
+
+/* =========================
+   Leaderboard-specific fixes
+   ========================= */
+.leaderboard {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leader-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  box-sizing: border-box;
+}
+
+.leader-row .leader-avatar {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  flex: 0 0 48px !important;
+  object-fit: cover !important;
+  border-radius: 10px !important;
+  display: block !important;
+}
+
+/* Ensure any global avatar rules don't override leaderboard avatars */
+.leader-row img { width: 48px !important; height: 48px !important; object-fit: cover !important; }
+
+/* Crown layering: ensure crown sits above winner avatar and doesn't affect layout */
+.winner-center { position: relative; z-index: 2; }
+.winner-crown { z-index: 5; pointer-events: none; }
+.winner-crown-inner { width: 88px; height: 88px; display: block; }
+
+/* Keep winner avatar large but don't affect list avatars */
+.winner-avatar { width: 140px; height: 140px; border-radius: 16px; object-fit: cover; border: 5px solid rgba(255,255,255,0.04); display:block; z-index: 1; }
+
+/* Safety: leader list responsive */
+@media (max-width: 520px) {
+  .leader-row .leader-avatar { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; flex: 0 0 40px !important; }
+  .winner-avatar { width: 120px; height: 120px; }
+  .winner-crown-inner { width: 64px; height: 64px; }
+}
+
+/* (Rest of your existing CSS remains unchanged) */
+
+@keyframes popIn { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }

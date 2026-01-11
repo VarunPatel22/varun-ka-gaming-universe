@@ -28,11 +28,14 @@
       <button id="start" class="btn ghost host-only" onclick="startGame()">Start Round</button>
     </div>
 
+    <!-- scoreboard below controls -->
+    <div id="topScoreboard" class="score-top">Scores — —</div>
+
     <div id="options" class="options-grid compact"></div>
-    <pre id="scores" class="muted small-scores"></pre>
+    <pre id="scores" class="muted small-scores" style="display:none;"></pre>
   </main>
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
