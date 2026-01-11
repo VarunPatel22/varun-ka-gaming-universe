@@ -17,7 +17,7 @@ let hasSubmitted = false;
 let hasVoted = false;
 let myName = null;
 
-const ICON_BASE = "/icons";
+const ICON_BASE = "./icons";
 const ICON_COUNT = 20;
 let selectedAvatar = `${ICON_BASE}/icon-1.jpg`;
 const avatarImages = Array.from({ length: ICON_COUNT }, (_, i) => `${ICON_BASE}/icon-${i+1}.jpg`);
